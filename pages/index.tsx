@@ -1,8 +1,35 @@
+import { useEffect, useRef } from "react";
+import Script from "next/script";
+
 export default function Home() {
+  const imgRef = useRef<HTMLImageElement>(null);
+
+  useEffect(() => {
+    const loadModel = async () => {
+      if (!imgRef.current || !(window as any).mobilenet) return;
+      const model = await (window as any).mobilenet.load();
+      const predictions = await model.classify(imgRef.current);
+      console.log("Predictions:", predictions);
+    };
+
+    loadModel();
+  }, []);
+
   return (
-    <div>
-      <main className="flex flex-col gap-[32px] row-start-2 items-center sm:items-start"></main>
-      <footer className="row-start-3 flex gap-[24px] flex-wrap items-center justify-center"></footer>
-    </div>
+    <>
+      {/* 외부 스크립트 로딩 */}
+      <Script
+        src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"
+        strategy="beforeInteractive"
+      />
+      <Script
+        src="https://cdn.jsdelivr.net/npm/@tensorflow-models/mobilenet@1.0.0"
+        strategy="beforeInteractive"
+      />
+
+      {/* 이미지와 실행 코드 */}
+      <h1>Image Classification</h1>
+      <img ref={imgRef} src="/cat.jpg" alt="cat" width={300} />
+    </>
   );
 }
